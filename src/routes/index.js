@@ -1,19 +1,9 @@
 const newsRouter = require('./new');
 const accountsRoute = require('./AccountRoute');
 const doctorsRoute = require('./DoctorRoute');
-const appointmentRoute= require('./AppointmentRoute');
+const appointmentRoute = require('./AppointmentRoute');
 const authenticatrionRoute = require('./AuthenticationRoute');
 const catalogIllnessRoute = require('./CatalogIllnessRoute');
-<<<<<<< HEAD
-const clinicRoute= require ('./ClinicRoute');
-const illnessRoute = require ('./IllnessRoute');
-const messengerRoute = require('./MessengerRoutes');
-const OwnerRoute =require ('./OwnerRoute');
-const PetRoute = require('./PetRoute')
-const fs = require('fs');
-const path = require('path');
-
-=======
 const illnessRoute = require('./IllnessRoute');
 const messengerRoute = require('./MessengerRoutes');
 const OwnerRoute = require('./OwnerRoute');
@@ -21,7 +11,9 @@ const PetRoute = require('./PetRoute');
 const ScheduleRoute = require('./ScheduleRoute')
 const ClinicRoute = require('./ClinicRoute');
 const LiquidationRoute = require('./LiquidationRoute');
->>>>>>> aef33b2 (update)
+const fs = require('fs');
+const path = require('path');
+
 
 
 function route(app) {
@@ -29,29 +21,26 @@ function route(app) {
     app.use('/api/Account', accountsRoute);
     app.use('/api/Doctor', doctorsRoute);
     app.use('/news', newsRouter);
-    app.use('/api/Appointment',appointmentRoute);
-    app.use('/api/Authentication',authenticatrionRoute);
-    app.use('/api/CatalogIllness',catalogIllnessRoute);
-    app.use('/api/Clinic',clinicRoute);
-    app.use('/api/Illness',illnessRoute);
-    app.use('/api/Messenger',messengerRoute);
+    app.use('/api/Appointment', appointmentRoute);
+    app.use('/api/Authentication', authenticatrionRoute);
+    app.use('/api/CatalogIllness', catalogIllnessRoute);
+    // app.use('/api/Clinic',clinicRoute);
+    app.use('/api/Illness', illnessRoute);
+    app.use('/api/Messenger', messengerRoute);
     app.use('/api/Owner', OwnerRoute);
     app.use('/api/Pet', PetRoute);
-<<<<<<< HEAD
-=======
     app.use('/api/Schedule', ScheduleRoute);
     app.use('/api/Clinic', ClinicRoute);
     app.use('/api/Liquidation', LiquidationRoute)
-    // app.post('/test', (request, response) => {
-    //     console.log(request.body.items);
-    //     return response.json({})
-    // })
->>>>>>> aef33b2 (update)
+    app.post('/test', (request, response) => {
+        console.log(request.body.items);
+        return response.json({})
+    })
     //Reading and Writing file 
-    app.get('/list/account',async (request,response)=>{
+    app.get('/list/account', async (request, response) => {
         // let array =Array(0);
         // let string ='';
-        
+
         // for (let i=1;i<=387;i++){
         //     if(String(i).length===1)
         //         string='00'+String(i);
@@ -75,7 +64,10 @@ function route(app) {
 
         //     console.log("The file was saved!");
         // }); 
-        response.json({success:true,message:'Connected successfully'});
+        response.json({
+            success: true,
+            message: 'Connected successfully'
+        });
     })
     // app.get('/Home', (req, res) => {
     //     res.render('Home');

@@ -73,6 +73,7 @@ class AccountController {
             return response.json({success:false, message:error});
         }
     }
+
     //[POST] /api/Account/login
     async login(request, response, next) {
         const {
@@ -238,6 +239,227 @@ class AccountController {
             
         } catch (error) {
             response.json({success:false,message:'Lỗi Server'});
+        }
+    }
+    //[GET] /api/Account/:id
+    async getOne(request,response){
+        try {
+            const findOwner = await OwnerModel.findById(request.params.id).populate('idNumber');
+            if(findOwner)
+            {
+                return response.json({
+                    success:true,
+                    user:{
+                        city: findOwner.city,
+                        cmnd: findOwner.cmnd,
+                        dateOfBirth:new Date(findOwner.dateOfBirth).toISOString().split('T')[0],
+                        district: findOwner.district,
+                        firstName: findOwner.firstName,
+                        gender: findOwner.gender,
+                        phoneNumber: findOwner.idNumber.phoneNumber,
+                        image: process.env.API_URL+ findOwner.image,
+                        lastName: findOwner.lastName,
+                        street: findOwner.street,
+                        ward:findOwner.ward,
+                        role:'USER',
+                        _id:findOwner._id
+                    }
+                })
+            }
+            else{
+                const findAccount = await doctorModel.findById(request.params.id);
+                if(findAccount)
+                    return response.json({
+                        success:true,
+                        user:{
+                            city: findAccount.city,
+                            cmnd: findAccount.cmnd,
+                            dateOfBirth:new Date(findAccount.dateOfBirth).toISOString().split('T')[0],
+                            district: findAccount.district,
+                            firstName: findAccount.firstName,
+                            gender: findAccount.gender,
+                            phoneNumber: findAccount.phoneNumber,
+                            image: process.env.API_URL+ findAccount.image,
+                            lastName: findAccount.lastName,
+                            street: findAccount.street,
+                            ward:findAccount.ward,
+                            role:findAccount.role,
+                            _id:findAccount._id
+                        }
+                    })
+                else
+                    return response.json({
+                        success:false,
+                        messages:'Thông tin không tồn tại'
+                    })
+            }
+        } catch (error) {
+            console.log(error.toString())
+            return response.json({
+                success:false,
+                messages:'Lỗi server'
+            })
+        }
+    }
+
+    //[POST] /api/Account/registerByAccount
+    async registerByAccount(request,response){
+        try {
+            const {
+                username,
+                password,
+                role,
+                idClinic,
+            }=request.body;
+            console.log(username)
+            if(!username)
+                return response.json({
+                    success:false,
+                    messages:'Tài khoản không được để trống'
+                })
+            else if(!password)
+                return response.json({
+                    success:false,
+                    messages:'Mật khẩu không được để trống'
+                })
+            else if(!role)
+                return response.json({
+                    success:false,
+                    messages:'Vai trò không được để trống'
+                })
+            else{
+                const findAccount = await accountModel.findOne({username});
+                if(findAccount)
+                    return response.json({
+                        success:false,
+                        messages:'Tài khoản đã tồn tại'
+                    })
+                else{
+                    const hashPassword= await argon2.hash(password)
+                    const account = new accountModel({
+                        username,
+                        password:hashPassword,
+                        role,
+                        idClinic,
+                    })
+                    const newAccount = await account.save();
+                    return response.json({
+                        success:true,
+                        messages:'Tạo tài khoản thành công',
+                        newAccount
+                    })
+                }
+            }
+        } catch (error) {
+            console.log(error.toString())
+            return response.json({
+                success:false,
+                messages:'Lỗi server'
+            })
+        }
+    }
+
+    //[POST] /api/Account/information
+    async createInformation(request,response){
+        try {
+            const {
+                lastName,
+                firstName,
+                dateOfBirth,
+                phoneNumber,
+                gender,
+                street,
+                cmnd,
+                city,
+                district,
+                ward,
+                // zipCode,
+                account
+            }=request.body;
+            if(!lastName || !firstName)
+                return response.json({
+                    success:false,
+                    messages:'Họ và tên không được để trống'
+                })
+            else if(!dateOfBirth)
+                return response.json({
+                    success:false,
+                    messages:'Ngày sinh không được để trống'
+                })
+            else if(!phoneNumber)
+                return response.json({
+                    success:false,
+                    messages:'Số điện thoại không được để trống'
+                })
+            else if(!gender)
+                return response.json({
+                    success:false,
+                    messages:'Giới tính không được để trống'
+                })
+            else if(!street)
+                return response.json({
+                    success:false,
+                    messages:'Địa chỉ không được để trống'
+                })
+            else if(!cmnd)
+                return response.json({
+                    success:false,
+                    messages:'Chứng minh nhân dân không được để trống'
+                })
+            else if(!city)
+                return response.json({
+                    success:false,
+                    messages:'Thành phố không được để trống'
+                })
+            else if(!district)
+                return response.json({
+                    success:false,
+                    messages:'Quận/Huyện không được để trống'
+                })
+            else if(!ward)
+                return response.json({
+                    success:false,
+                    messages:'Xã/Phường không được để trống'
+                })
+            // else if(!zipCode)
+            //     return response.json({
+            //         success:false,
+            //         messages:'zipcode không được để trống'
+            //     })
+            else if(!request.file)
+                return response.json({
+                    success:false,
+                    messages:'Ảnh không được để trống'
+                })
+            else{
+                const doctor = new doctorModel({
+                    lastName,
+                    firstName,
+                    dateOfBirth,
+                    phoneNumber,
+                    gender,
+                    street,
+                    cmnd,
+                    city,
+                    district,
+                    ward,
+                    // zipCode,
+                    image: `/images/doctor/${request.file.filename}`,
+                    account
+                })
+                const newDoctor = await doctor.save();
+                return response.json({
+                    success:true,
+                    messages:'Tạo tài khoản thành công',
+                    doctor:newDoctor
+                })
+            }
+        } catch (error) {
+            console.log(error.toString())
+            return response.json({
+                success:false,
+                messages:'Lỗi server'
+            })
         }
     }
 }

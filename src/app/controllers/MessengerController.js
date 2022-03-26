@@ -36,8 +36,8 @@ class MessengerController{
                     const doctor=await doctorModel.findById(_id);
                     filterMessages[i]=owner?
                     {
-                        firstName:owner.firstName,
-                        image:process.env.API_URL+owner.image,
+                        firstName:owner?.firstName,
+                        image:process.env.API_URL+owner?.image,
                         senderId:filterMessages[i].senderId ,
                         recieverId: filterMessages[i].recieverId,
                         textMessage: filterMessages[i].textMessage,
@@ -45,8 +45,8 @@ class MessengerController{
                         isRead:filterMessages[i].isRead,
                         _id:filterMessages[i]._id
                     }:{
-                        firstName:doctor.firstName,
-                        image:process.env.API_URL+ doctor.image,
+                        firstName:doctor?.firstName,
+                        image:process.env.API_URL+ doctor?.image,
                         senderId:filterMessages[i].senderId ,
                         recieverId: filterMessages[i].recieverId,
                         textMessage: filterMessages[i].textMessage,

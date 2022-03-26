@@ -63,9 +63,7 @@ class AuthenticationController{
     async checkToken(request,response)
     {
         try {
-            
             const owner = await ownerModel.findOne({_id:request._id}).populate('idNumber');
-            console.log(owner)
             if(owner)
                 return response.json({
                     success:true,

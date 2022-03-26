@@ -1,4 +1,4 @@
-const { findById } = require('../models/AppointmentModel');
+
 const appointmentModal = require('../models/AppointmentModel');
 const account = require('../models/DoctorModel');
 
@@ -12,7 +12,6 @@ class AppointmentController{
             content,
             startDate
         }=request.body;
-        console.log(request.body)
         if(!idPet)
             return response.json({
                 success:false,
@@ -28,15 +27,25 @@ class AppointmentController{
                 success:false,
                 messages:`Bây giờ là: ${new Date().toLocaleDateString()+" "+ new Date().toLocaleTimeString()}`
             })
+        
         else
+        {
             try {
-                const findAppointment = await appointmentModal.findOne({startDate,idOwner:request.userId});
-                if(findAppointment){
+                const findAppointment = await appointmentModal.find({idOwner:request.userId,idPet,status:['REQUESTING','WAITING']});
+                console.log(findAppointment)
+                if(findAppointment.length>0){
+                    return response.json({
+                        success:false,
+                        messages:`Thú cưng hiện tại đã có cuộc hẹn`
+                    })
+                }
+                else if(findAppointment.filter(appointment=>appointment.startDate===startDate?true:false).length>0){
                     return response.json({
                         success:false,
                         messages:`Bạn đã có lịch tại ${startDate}`
                     })
                 }
+                
                 var date= startDate.split(' ')
                 var dateString='';
                 if(Number(date[1].split(':')[0])+1>=12)
@@ -58,7 +67,8 @@ class AppointmentController{
                 if(newAppointment)
                     return response.json({
                         success:true,
-                        appointment:newAppointment
+                        appointment:newAppointment,
+                        messages:'Yêu cầu thành công'
                     })
                 else
                     return response.json({
@@ -66,12 +76,14 @@ class AppointmentController{
                         messages:'yêu cầu không thành công'
                     })
             } catch (error) {
+                console.log(error.toString())
                 return response.json({
                     success:false,
                     messages:'yêu cầu không thành công'
                 })
                 
             }
+        }
     }
     
     //[GET] api/Appointment
@@ -103,13 +115,49 @@ class AppointmentController{
         }
     }
 
+    //[GET] api/Appointment/:id
+    async showOne(request,response){
+        try {
+            
+            const appointment = await appointmentModal.findOne({idOwner:request.userId,_id:request.params.id}).populate('idOwner').populate('idPet').populate('idDoctor');
+            if(appointment){
+                return response.json({
+                    success:true,
+                    appointment
+                })
+            }
+            else
+                return response.json({
+                    success:false,
+                    messages:'Lịch hẹn không tồn tại'
+                })
+        } catch (error) {
+            console.log(error.toString())
+            return response.json({
+                success:false,
+                messages:'Lỗi server'
+            })
+        }
+    }
+
     //[DELETE] api/Appointment/:id
     async deleteOne(request,response){
         try {
-            const appointment = await appointmentModal.
+            const findAccount = await account.findById(request.userId).populate('account');
+            var appointment;
+            if(findAccount.account.role="ADMIN")
+            {
+                appointment = await appointmentModal.
+                findOneAndUpdate({_id:request.params.id},
+                {status:'CANCELED'},
+                {new:true}).populate('idOwner').populate('idPet').populate('idDoctor')
+            }
+            else{
+                appointment = await appointmentModal.
                 findOneAndUpdate({idOwner:request.userId,_id:request.params.id},
                 {status:'CANCELED'},
                 {new:true}).populate('idOwner').populate('idPet').populate('idDoctor')
+            }
             if(appointment)
                 return response.json({
                     success:true,
@@ -181,6 +229,40 @@ class AppointmentController{
             return response.json({
                 success:false,
                 messages:'Lỗi server'
+            })
+        }
+    }
+
+    //[PATCH] api/Appointment/finish/:id
+    async finishOne(request,response){
+        try {
+            const findAppointment =await appointmentModal.findById(request.params.id);
+            if(new Date(findAppointment.startDate) >= new Date())
+                return response.json({
+                    success:false,
+                    messages:'Cuộc hẹn chưa bắt đầu'
+                })
+            else{
+                const updatedAppointment = await appointmentModal.findByIdAndUpdate(request.params.id,{status:'FINISHED'});
+                if(updatedAppointment)
+                {
+                    return response.json({
+                        messages:'Cập nhập thành công',
+                        success:true,
+                        updatedAppointment
+                    })
+                }
+                else
+                    return response.json({
+                        success:false,
+                        messages:'Cuộc hẹn không tồn tại',
+                    })
+            }
+            
+        } catch (error) {
+            return response.json({
+                success:false,
+                messages:'Lỗi Server',
             })
         }
     }

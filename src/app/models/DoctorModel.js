@@ -49,8 +49,8 @@ const Doctor = new Schema({
     zipCode: {
         type: String,
         default: '',
-        maxlength:6,
-        minlength:6
+        // maxlength:6,
+        // minlength:6
     },
     account: {
         type: Schema.Types.ObjectId,

@@ -8,7 +8,7 @@ class DoctorController {
     async findOne(request,response){
         try {
             const findDoctor = await doctorModel.findById(request.params.id).populate('review.idOwner');
-            console.log(findDoctor)
+
             if(findDoctor)
                 return response.json({
                     success:true,
@@ -74,6 +74,43 @@ class DoctorController {
         }
     }
 
+    //[GET] api/Doctor/list-doctor/:id
+    async showOne(request, response, next) {
+        try {
+            const doctors = await doctorModel.find({}).populate({path:'account'});
+            const newDoctors= doctors
+            .filter(doctor=>doctor.account.idClinic==request.params.id?true:false)
+            .map(doctor=>{
+                return{
+                    _id:doctor._id,
+                    firstName:doctor.firstName,
+                    lastName:doctor.lastName,
+                    dateOfBirth:doctor.dateOfBirth,
+                    phoneNumber:doctor.phoneNumber,
+                    gender:doctor.gender,
+                    image:process.env.API_URL+ doctor.image,
+                    street:doctor.street,
+                    city:doctor.city,
+                    district:doctor.district,
+                    ward:doctor.ward,
+                    zipCode:doctor.zipCode,
+                    review:doctor.review,
+                    account:doctor.account
+                }
+            })
+            return response.json({
+                doctors:newDoctors,
+                success:true,
+            })
+        } catch (error) {
+            return response.json({
+                success:false,
+                message:error
+            })
+        }
+    }
+
+
     //[POST] /api/Doctor/review
     async reviewDoctor (request,response){
         try {
@@ -98,7 +135,6 @@ class DoctorController {
                 const appointment = await appointmentModel.findOne({idOwner:request.userId,idDoctor});
                 if(appointment){
                     const doctor = await doctorModel.findById(idDoctor,{review:[]}).select('review');
-                    console.log(request.userId)
                     if(doctor.review.filter(value=>value.idOwner.toString()===request.userId).length>0)
                         return response.json({
                             success:false,
@@ -122,7 +158,7 @@ class DoctorController {
                 else
                     return response.json({
                         success:false,
-                        messages:'Bạn đã từng có cuộc hẹn này với bác sĩ'
+                        messages:'Bạn đã chưa từng có cuộc hẹn này với bác sĩ'
                     })
             }
         } catch (error) {

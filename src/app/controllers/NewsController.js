@@ -9,7 +9,7 @@ class NewsController {
             
         })
         
-        // response.render('News');
+        // response.render('Ne#ws');
 
         response.json({success:'thanhcong'})
     }

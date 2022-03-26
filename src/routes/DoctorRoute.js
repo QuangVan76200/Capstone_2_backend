@@ -5,6 +5,7 @@ const auth = require('../app/middleware//auth')
 
 
 router.get('/list-doctor',auth,doctorController.showAll);
+router.get('/list-doctor/:id',auth,doctorController.showOne);
 router.post('/review',auth,doctorController.reviewDoctor);
 router.get('/:id',auth,doctorController.findOne);
 

@@ -88,8 +88,19 @@ module.exports = (io)=>{
         //load messanges
        
         socket.on('loadMessages',async({senderId,recieverId},dispatch)=>{
-            const messages=await Messages.find({}).or([{senderId},{recieverId:senderId}])
-            
+            // console.log(senderId,recieverId)
+            const messages=await Messages.find({
+                $or:[
+                    {$and:[{senderId},{recieverId}]},
+                    {$and:[{senderId:recieverId},{recieverId:senderId}]}
+                ]
+
+            })
+            // $and:[
+            //     {$or:[{senderId},{recieverId}]},
+            //     {$or:[{senderId:recieverId},{recieverId:senderId}]}
+            // ]
+            // console.log(messages)
             return dispatch(messages.filter((mess)=>(
                 (mess.senderId===senderId||mess.recieverId===senderId)&&(mess.senderId===recieverId||mess.recieverId===recieverId)
             )));

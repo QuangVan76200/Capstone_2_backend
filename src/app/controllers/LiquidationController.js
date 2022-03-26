@@ -47,6 +47,8 @@ class LiquidationController {
 
         try {
             const findProduct = await LiquidationModel.find({});
+            const findAccount = await Account.find({});
+            console.log(findAccount);
             return respone.json({
                 success: true,
                 products: findProduct.map(value => {

@@ -52,6 +52,7 @@ const appointment = new Scheme({
     Location:{
         type:mongoose.Types.ObjectId,
         default:null,
+
     }
 }, {
     timestamps: true

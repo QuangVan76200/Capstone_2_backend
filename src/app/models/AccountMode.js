@@ -26,6 +26,11 @@ const AccountModel = new Schema({
         type: String,
         default: 'ADMIN',
         uppercase: true
+    },
+    idClinic:{
+        type:mongoose.Types.ObjectId,
+        ref:'clinics',
+        default:null
     }
 }, {
     timestamps:true
