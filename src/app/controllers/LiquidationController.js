@@ -5,20 +5,20 @@ const fs = require("fs");
 class LiquidationController {
   async requestOne(request, respone) {
     try {
-      const findProduct = await Product.findOne({
-        _id: req.params.id,
-      }).populate("idOwner");
-
+      const findProduct = await LiquidationModel.findById(request.params.id);
+      console.log(findProduct);
       if (findProduct) {
         return respone.json({
           success: true,
-          findProduct: {
+          product: {
             _id: findProduct._id,
             titleProduct: findProduct.titleProduct,
             priceProduct: findProduct.priceProduct,
             amountProduct: findProduct.amountProduct,
             comments: findProduct.comments,
-            imageProduct: process.env.API_URL + findProduct.imageProduct,
+            imageProduct: findProduct.imageProduct.map(
+              (value) => process.env.API_URL + value.image
+            ),
             idOwner: findProduct.idOwner,
           },
         });
@@ -29,6 +29,7 @@ class LiquidationController {
         });
       }
     } catch (error) {
+      console.log(error);
       return respone.json({
         success: false,
         message: "Không tồn tại sản phẩm nào",
@@ -97,15 +98,14 @@ class LiquidationController {
   //[POST]
   async postProduct(request, response) {
     const { titleProduct, priceProduct, amountProduct } = request.body;
- console.log(request.body);
+    console.log(request.body);
     if (!titleProduct) {
-    
       return response.json({
         success: false,
         message: "Title is required",
       });
     }
-    
+
     try {
       const newProduct = await new LiquidationModel({
         titleProduct,
